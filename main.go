@@ -9,16 +9,23 @@ type server struct {
 	addr string
 }
 
-func (s *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("Hello from Go server"))
+func (s *server) serverStatus(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte("Server is up and working properly"))
 }
 
 func main() {
-	s := &server{addr: ":8191"}
+	server := &server{addr: ":8191"}
 
-	err := http.ListenAndServe(s.addr, s)
+	mux := http.NewServeMux()
 
-	if err != nil {
+	srv := &http.Server{
+		Addr:    server.addr,
+		Handler: mux,
+	}
+
+	mux.HandleFunc("GET /", server.serverStatus)
+
+	if err := srv.ListenAndServe(); err != nil {
 		log.Fatal(err)
 	}
 }
